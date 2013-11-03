@@ -1,0 +1,61 @@
+#########################################################################
+# author:  Shiliang Wang           
+# Email:   wangshiliang@jhu.edu
+#########################################################################
+Assignment 8: Procedures for Fun and Profit
+
+Language Options I have choosen:
+I have implemented all of the procedure mechanism, including Local Varables, Parameters, Results, Recursion and Rest.
+
+Implementation Options I have choosen:
+I have implemented Advanced Code Generator and Interpreter.  which is -x and -i options.
+However, due to the time reasons, the Advanced Code Generator just implemented some procedure mechanism including Local Variables, Parameters, and Rest.
+
+Extra Features I have implemented:
+In order to find the position of errors much eaiser, except for the accuate position which is required in the SIMPLE, I also return the line number
+of the error. Such inspiration came from many debug tools like GCC, VC, etc. Get the line number of the error really helps me a lot in finding the 
+bugs. 
+Also, if there exists an error in procedure, it will not exist the program directly, After detecting a syntax error, it will surpress further error messages 
+until at least eight additional tokens have been processed. I also handle weak and strong symbols just like assignment 2.
+
+1. Extending SIMPLE
+Adding procedures to SIMPLE will affect all components of the existing compiler, from the scanner to code generator.
+Scanner:
+I add 'PROCEDURE' and 'RETURN' as the new keywords.
+Parser:
+I add a new kind of declaration to introduce procedures. Procedures can have formal parameters and can also have a return type if they are supposed
+to be called as expressions. Inside of a procedure, we can declare local variables that do not affect the rest of the program outside the procedure.
+Procedure can have a body of insrtructions as well as return expression.
+We can call procedures as instructions or expressions. Since there exists LL(1) conflict between Call and Designator, I resolve this conflict by
+looking the identifier up in the symbol table. If it is a procedure, parse Call, otherwise parse Designator. 
+SymbolTable:
+I introduce a new kind of Entry class for procedures called Procedure. It contains a scope of formal parameters and local variables, In order to get 
+access to the global variable more conveinient, it also contains the global variable which is not the local variable. It also contains up to two 
+abstract syntax trees representing the body of the procedure as well as the return expression of the function. 
+I also split the existing Variable entry into up to three new kinds of entries: GlobalVariable, LocalVariable and FormalVariable. 
+The way I use to address the recursive procedure problem is as follows: I just make the entry right away before I start processing the body of a 
+procedure, then when I'm done with the body, I update the procedure's entry with these AST. 
+Ast:
+I add a new node to the abstract syntax tree to represent procedure or function calls which are called ProcedureCall and FunctionCall respectively. 
+
+Interpreter:
+In order to deal with the case of recursion, I add an environment array in Interpreter class. If the interpreter runs into a procedure, the index
+of the array will increase 1 and the environment box will be built in corresponding element of the array. I also create a new to_interpret function 
+in FunctionCall and ProcedureCall class. It will first initialize the environment of the all the variables in the symbol table. If the variable is 
+a formal variable, it will copy the environment from the outside box if the type is an integer. If it is a Record or Array type, it will create a 
+new Reference box which contains the correspondent box in the outer scope. If the variable is a local variable, it will initialize a new box. If the 
+variable is a global variable, it will points to the coreespondent box in the outer scope. After create the new boxes, it will start to interpret the
+body of AST and the return body of AST if exists.
+
+Improved Code Generator:
+It is kind of similiar with the interpreter but it is much more complex. I create a new to_improved_code_generation function in FunctionCall and 
+ProcedureCall class. It will first calculate the total space it need to allocate in stack by iterating the variables of the symboltable. It will also
+load all the parameters in the caller to the correspondent register. After that, it will generate a new function label, push the fp, lr to the stack 
+and get the parameters from the register and initialize the formal parameter in the callee. After create the new boxes, it will start to generate the 
+code of the body of AST and the return body of AST if exists. 
+
+2. Error Handling
+I have handled most of the errors in the interpreter and it will return very accuate and helpful information of the errors.
+ 
+
+

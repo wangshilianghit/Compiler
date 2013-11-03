@@ -1,0 +1,160 @@
+PROGRAM X;
+CONST
+  sz = 47;
+VAR
+  a: ARRAY sz OF INTEGER;
+  i: INTEGER;
+BEGIN
+  i := 0;
+  REPEAT
+    a[i] := 64738
+  UNTIL i >= sz END 
+END X.
+
+PROGRAM As3;
+CONST x = -47;
+TYPE T = RECORD x: INTEGER; END;
+VAR a: ARRAY 12 OF T;
+BEGIN
+  a[7].x := -x
+END As3.
+Context Conditions:
+
+1. Identifiers must be declared before they are used
+PROGRAM X;
+VAR i: INTEGER;
+BEGIN
+m:=10;
+WHILE i > 0 DO
+  WRITE d;
+  i := i - 1
+END;
+WRITE 42
+END X.
+error: the identifier "m" hasn't been declared yet at Line: 4, Position: (33, 33)
+error: the identifier "d" hasn't been declared yet at Line: 6, Position: (63, 63)
+
+PROGRAM As3;
+CONST x = -47;
+TYPE T = RECORD f: INTEGER; END;
+VAR a: ARRAY 12 OF T;
+BEGIN
+  a[7].m := -x
+END As3.
+
+error: the identifier "m" hasn't been declared in this record at Line: 6, Position: (96, 96)
+
+
+2. NO identifier can be declared more than once in a given scope, an identifier from an eclosing scope can be shadowed by a
+new declaration in the current scope.
+PROGRAM As3;
+CONST x = -47;
+TYPE T = RECORD x: INTEGER; END;
+VAR a: ARRAY 12 OF T;
+BEGIN
+  a[7].x := -x
+END As3.
+
+3. The identifier after PROGRAM and the corresponding idntifier after the corresponding END must be identical; that identifier 
+is not added to the symbol table.
+PROGRAM X;
+VAR i: INTEGER;
+BEGIN
+i:=10;
+WHILE i > 0 DO
+  WRITE i;
+  i := i - 1
+END;
+WRITE 42
+END A.
+error: the identifier after PROGRAM and the corresponding identifier after corresponding END is not identical
+
+4. The "lonely" identifier in the Type production must denote a type; it is an error if that identifier denotes a constant or a 
+variable.
+PROGRAM As3;
+CONST x = -47;
+TYPE T = x;
+VAR a: ARRAY 12 OF T;
+BEGIN
+  a[7].f := -x
+END As3.
+error: The identifier "T" in the Type production must denote a type at Line: 3, Position:33
+error: can't use '.' operator at Line: 3, Position: 33
+
+5. The expression in the Type production must be constatnt, of type integer and greater than zero
+
+6. The expression in a constant declaration must be constatnt. 
+PROGRAM As3;
+VAR i: INTEGER;
+CONST x = -47 + i;
+TYPE T = RECORD f: INTEGER; END;
+VAR a: ARRAY 12 OF T;
+BEGIN
+  a[7].f := -x
+END As3.
+error: the expression in the constant declaration must be constant at Line: 3
+
+7. Arithmetic operators are only applicable to operands of type integer
+PROGRAM Selection;
+CONST
+  size = 8;
+VAR
+  a: ARRAY size OF INTEGER;
+  i, t, n, m: INTEGER;
+BEGIN
+  (* Read in the unsorted array. *)
+  i := 0;
+  WHILE i < size DO
+    READ a[i];
+    i := a+ 1
+  END
+END Selection.
+error: arithmetic operators are only applicable to operands of type integer at Line: 12, Position: 188
+
+8. The designator in the Factor production must denote a variable or a constant
+PROGRAM X;
+VAR i: INTEGER;
+TYPE T = RECORD x: INTEGER; END;
+VAR
+  a: ARRAY 10 OF T;
+BEGIN
+i:=10;
+WHILE i > 0 DO
+  WRITE i;
+  i := i *a[1] + 1
+END;
+WRITE 42
+END X.
+error: arithmetic operators are only applicable to operands of type integer at Line: 10, Position: 133
+
+
+9. The designator in the Assign production must denote a variable. The type of the left-hand side must be compatible with the type of 
+the right-hand side under occurrence equivalence, they must refer to the same type entry in the symbol table. Note that you can assign
+arrays and records.
+
+10. The expressions in the Condition production must both be of type integer, you cannot compare arrays or records
+
+
+11. The expression in the Write production must be of type integer, you cannot ouput arrays or records.
+PROGRAM X;
+VAR i: INTEGER;
+TYPE T = RECORD x: INTEGER; END;
+VAR
+  a: ARRAY 10 OF INTEGER;
+BEGIN
+i:=10;
+WHILE i > 0 DO
+  WRITE i;
+  i := i *a[1] + 1
+END;
+WRITE a
+END X.
+error: The expression in the Write production must be of type integer at Line: 12, Position: 159
+
+12. The designator in the Read production must denote a variable of type integer. you cannot input arrays or records
+
+13. the identifier in the Designator production must denote a variable or a constatnt, it cannot denote a type
+
+14. Selector "[]" are only applicable to variables of array tpye; the type resulting from a single selector application is the element 
+type of the array tpye; the type of each expression in the ExpressionList must be integer. Selector "." are only applicable to variables
+of record type; the type resulting from a single selector application is the field type of the denoted field.
